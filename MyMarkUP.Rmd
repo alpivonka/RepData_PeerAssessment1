@@ -1,0 +1,45 @@
+---
+title: "My First R Markdown File"
+output: html_document
+---
+
+This is my first Markdown file to look at data
+
+**Loading and preprocessing the data**
+
+```{r load_data}
+csvRaw <-read.csv("data/activity.csv")
+omittedNA <-na.omit(csvRaw)
+rm(csvRaw)
+head(omittedNA)
+nrow(omittedNA)
+
+
+```
+**What is mean total number of steps taken per day?**
+
+```{r mean_total_steps}
+
+sumByDate<-aggregate(omittedNA$steps~omittedNA$date,FUN=sum)
+names(sumByDate)<-c("date","steps")
+print(head(sumByDate))
+nrow(sumByDate)
+x<-sumByDate$steps
+myHist<-hist(x,xlab="Total Steps",main="Total Steps by date",col="gray")
+xfit<-seq(min(x),max(x),length=40)
+yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
+yfit <- yfit*diff(myHist$mids[1:2])*length(x)
+lines(xfit, yfit, col="blue", lwd=2)
+#library(ggplot2)
+#ggplot(data=sumByDate,aes(steps),xlab="Total Steps")+ geom_histogram()
+```
+***Mean & Median ***
+
+```{r mean_median, echo=FALSE}
+theMean<-mean(x)
+theMean
+theMedian<-median(x)
+theMedian
+
+```
+The mean of the total steps by date is `r theMean` and the median is `r theMedian`.
