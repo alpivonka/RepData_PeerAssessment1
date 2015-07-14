@@ -1,25 +1,155 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
 output: 
-  html_document:
-    keep_md: true
+html_document:
+  keep_md: true
+  toc: true
 ---
+
+
 
 
 ## Loading and preprocessing the data
 
+```{r load_data}
+csvRaw <-read.csv("data/activity.csv")
+totalRows<-nrow(csvRaw)
+omittedNA <-na.omit(csvRaw)
+#rm(csvRaw)
+head(omittedNA,5)
+totalRowsOmitNAs<-nrow(omittedNA)
+```
 
-
+Total rows of raw data is `r format(totalRows,big.mark=",",scientific=FALSE)` and after we omit NA's the total is `r format(totalRowsOmitNAs,big.mark=",",scientific=FALSE) `. We have ommtted `r format(totalRows - totalRowsOmitNAs,big.mark=",",scientific=FALSE)` incomplete records.
 ## What is mean total number of steps taken per day?
 
+```{r mean_total_steps,fig.height=4,fig.width=10}
+
+sumByDate<-aggregate(omittedNA$steps~omittedNA$date,FUN=sum)
+names(sumByDate)<-c("date","steps")
+mean_total_steps_count<-nrow(sumByDate)
+
+```
+The total number of rows from the aggregate of steps ~ date is `r format(mean_total_steps_count,big.mark=",",scientific=FALSE)`.
 
 
-## What is the average daily activity pattern?
+```{r histagram,fig.height=4,fig.width=10}
+x<-sumByDate$steps
+myHist<-hist(x,xlab="Total Steps",main="Total Steps by date",col="gray")
+xfit<-seq(min(x),max(x),length=40)
+yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
+yfit <- yfit*diff(myHist$mids[1:2])*length(x)
+lines(xfit, yfit, col="blue", lwd=2)
+```
 
 
+***Mean & Median ***
+
+
+```{r mean_median}
+theMean<-mean(x)
+theMedian<-median(x)
+theMean
+theMedian
+```
+The mean of the total steps by date is `r format(theMean,big.mark=",",scientific=FALSE)` and the median is `r format(theMedian,big.mark=",",scientific=FALSE) `.
 
 ## Imputing missing values
 
+**What is the average daily activity pattern?**
 
+1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+
+```{r steps_interval,fig.height=4,fig.width=10}
+steps_interval <- aggregate(steps ~ interval, data = omittedNA, FUN = mean)
+par(pch=22, col="blue")
+plot(steps_interval,type="l")
+```
+
+
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+
+```{r max_steps}
+max_steps<-steps_interval[which.max(steps_interval$steps),]
+r_steps <- max_steps$steps
+r_interval <- max_steps$interval
+```
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+
+The 5-minute interval containing the maxium number of steps   is interval `r format(r_interval,big.mark=",",scientific=FALSE) ` with `r format(r_steps,big.mark=",",scientific=FALSE)` steps.
+
+
+```{r}
+#csvRaw[is.na(csvRaw$steps)] <- mean(csvRaw$steps, na.rm = TRUE)
+raw<-csvRaw
+totalNonCompleteRows <-sum(!complete.cases(raw))
+totalRawcount<-nrow(csvRaw)
+
+raw$steps[is.na(raw$steps)] = mean(raw$steps, na.rm=TRUE)
+raw$interval[is.na(raw$interval)] = mean(raw$interval, na.rm=TRUE)
+countOfFilledIn<-nrow(raw)
+
+omittedNARaw <-na.omit(raw)
+CountOfFilledInWithoutNAs<-nrow(omittedNARaw)
+#head(raw)
+
+```
+The original count of rows was `r format(totalRawcount,big.mark=",",scientific=FALSE) `, there are `r format(totalNonCompleteRows,big.mark=",",scientific=FALSE)` incomplete rows in the orignal dataset.
+
+We utilized the mean of the column as a replacement for any NAs of the column. The total number of rows after replacing all NAs with the mean of the column is `r format(countOfFilledIn,big.mark=",",scientific=FALSE) `. 
+
+To validate our results we performed a na.omit on the data frame and come up with `r format(CountOfFilledInWithoutNAs,big.mark=",",scientific=FALSE) ` as its row count.
+
+
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+```{r filled_NAs_Hist, fig.height=4,fig.width=10}
+
+sumByDate_noNAs<-aggregate(raw$steps~raw$date,FUN=sum)
+names(sumByDate_noNAs)<-c("date","steps")
+
+theNewMean <- mean(sumByDate_noNAs$steps)
+theNewMedian <-median(sumByDate_noNAs$steps)
+
+
+NaFilledHist<-hist(sumByDate_noNAs$steps,xlab="Total Steps",main="Total Steps by date #2",col="gray")
+xfit<-seq(min(x),max(x),length=40)
+yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
+yfit <- yfit*diff(NaFilledHist$mids[1:2])*length(x)
+lines(xfit, yfit, col="blue", lwd=2)
+```
+
+The original mean was `r format(theMean,big.mark=",",scientific=FALSE)` and the new mean is `r format( theNewMean,big.mark=",",scientific=FALSE)`.
+The original median was `r format(theMedian,big.mark=",",scientific=FALSE)` and the new median is `r format( theNewMedian,big.mark=",",scientific=FALSE)`.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+```{r weekdays_weekends}
+raw$daysOfWeek<-weekdays(as.Date(raw$date))
+raw[sample(nrow(raw),5),]
+raw$wknd_wkday<- as.factor(ifelse(raw$daysOfWeek %in% c("Saturday","Sunday"), "Weekend", "Weekday")) 
+raw[sample(nrow(raw),5),]
+```
+
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+```{r panel_plot,fig.height=4,fig.width=10}
+library(ggplot2)
+steps_by_interval <- aggregate(steps ~ interval + wknd_wkday, raw, mean)
+weekday_means<- aggregate(steps ~ wknd_wkday, steps_by_interval, mean)
+names(weekday_means)<-c("wknd_wkday","mean_steps")
+weekday_means
+weekday_median<- aggregate(steps ~ wknd_wkday, steps_by_interval, median)
+names(weekday_median)<-c("wknd_wkday","median_steps")
+weekday_median
+
+qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="Interval",ylab="Number of steps",color=wknd_wkday) +facet_wrap(~ wknd_wkday, ncol = 1)
+
+qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="Interval",ylab="Number of steps",color=wknd_wkday) #+facet_wrap(~ wknd_wkday, ncol = 1)
+```
