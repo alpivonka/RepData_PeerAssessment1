@@ -13,7 +13,7 @@ This is my first Markdown file to look at data
 csvRaw <-read.csv("data/activity.csv")
 omittedNA <-na.omit(csvRaw)
 #rm(csvRaw)
-head(omittedNA)
+head(omittedNA,5)
 totalRows<-nrow(omittedNA)
 ```
 Total rows of data after we omit NA's is `r format(totalRows,big.mark=",",scientific=FALSE) `.
@@ -99,29 +99,32 @@ We utilized the mean of the column as a replacement for any NAs of the column. T
 
 To validate our results we performed a na.omit on the data frame and come up with `r format(CountOfFilledInWithoutNAs,big.mark=",",scientific=FALSE) ` as its row count.
 
-```{r compare_hist, fig.height=4,fig.width=10}
 
-plot(myHist)
-xfit<-seq(min(x),max(x),length=40)
-yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
-yfit <- yfit*diff(myHist$mids[1:2])*length(x)
-lines(xfit, yfit, col="blue", lwd=2)
-```
 
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 ```{r filled_NAs_Hist, fig.height=4,fig.width=10}
 
 sumByDate_noNAs<-aggregate(raw$steps~raw$date,FUN=sum)
-meanByDate_noNAs<-aggregate(raw$steps~raw$date,FUN=mean)
-medianByDate_noNAs<-aggregate(raw$steps~raw$date,FUN=median)
 names(sumByDate_noNAs)<-c("date","steps")
-names(meanByDate_noNAs)<-c("date","steps")
-names(medianByDate_noNAs)<-c("date","steps")
+
+theNewMean <- mean(sumByDate_noNAs$steps)
+theNewMedian <-median(sumByDate_noNAs$steps)
 
 
-
-NaFilledHist<-hist(sumByDate_noNAs$steps,xlab="Total Steps",main="2 Total Steps by date",col="gray")
+NaFilledHist<-hist(sumByDate_noNAs$steps,xlab="Total Steps",main="Total Steps by date #2",col="gray")
 xfit<-seq(min(x),max(x),length=40)
 yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
 yfit <- yfit*diff(NaFilledHist$mids[1:2])*length(x)
 lines(xfit, yfit, col="blue", lwd=2)
+```
+
+The original mean was `r format(theMean,big.mark=",",scientific=FALSE)` and the new mean is `r format( theNewMean,big.mark=",",scientific=FALSE)`.
+The original median was `r format(theMedian,big.mark=",",scientific=FALSE)` and the new median is `r format( theNewMedian,big.mark=",",scientific=FALSE)`.
+
+```{r weekdays_weekends}
+raw$weekdays<-weekdays(as.Date(raw$date))
+raw[sample(nrow(raw),5),]
+raw$wkndwkday<- as.factor(ifelse(raw$weekdays %in% c("Saturday","Sunday"), "Weekend", "Weekday")) 
+raw[sample(nrow(raw),5),]
+ 
 ```
