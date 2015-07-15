@@ -2,27 +2,35 @@
 title: "Reproducible Research: Peer Assessment 1"
 output: 
 html_document:
+  theme: cerulean
+  highlight: tango
   keep_md: true
-  toc: true
+  
 ---
-
-
-
-
 ## Loading and preprocessing the data
 
 ```{r load_data}
 csvRaw <-read.csv("data/activity.csv")
 totalRows<-nrow(csvRaw)
+uniqueDates<-length(unique(csvRaw$date))
+summary(csvRaw)
+```
+The raw activity data contains `r format(totalRows,big.mark=",",scientific=FALSE)` rows and  `r uniqueDates` unique dates.
+
+```{r omit_NAs}
 omittedNA <-na.omit(csvRaw)
-#rm(csvRaw)
-head(omittedNA,5)
+
 totalRowsOmitNAs<-nrow(omittedNA)
+uniqueDatesNoNAs<-length(unique(omittedNA$date))
+summary(omittedNA)
 ```
 
-Total rows of raw data is `r format(totalRows,big.mark=",",scientific=FALSE)` and after we omit NA's the total is `r format(totalRowsOmitNAs,big.mark=",",scientific=FALSE) `. We have ommtted `r format(totalRows - totalRowsOmitNAs,big.mark=",",scientific=FALSE)` incomplete records.
-## What is mean total number of steps taken per day?
+After omitting NAs, the activity data now contains `r format(totalRowsOmitNAs,big.mark=",",scientific=FALSE) ` rows and `r uniqueDatesNoNAs` unique dates.
+We have ommtted `r format(totalRows - totalRowsOmitNAs,big.mark=",",scientific=FALSE)` incomplete cases.
 
+<hr>
+## What is mean total number of steps taken per day?
+1. Calculate the total number of steps taken per day
 ```{r mean_total_steps,fig.height=4,fig.width=10}
 
 sumByDate<-aggregate(omittedNA$steps~omittedNA$date,FUN=sum)
@@ -33,27 +41,30 @@ mean_total_steps_count<-nrow(sumByDate)
 The total number of rows from the aggregate of steps ~ date is `r format(mean_total_steps_count,big.mark=",",scientific=FALSE)`.
 
 
+2. Histogram
+
 ```{r histagram,fig.height=4,fig.width=10}
-x<-sumByDate$steps
-myHist<-hist(x,xlab="Total Steps",main="Total Steps by date",col="gray")
-xfit<-seq(min(x),max(x),length=40)
-yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
-yfit <- yfit*diff(myHist$mids[1:2])*length(x)
+
+
+myHist<-hist(sumByDate$steps,xlab="Total Steps",main="Total Steps by date",col="gray")
+xfit<-seq(min(sumByDate$steps),max(sumByDate$steps),length=40)
+yfit<-dnorm(xfit,mean=mean(sumByDate$steps),sd=sd(sumByDate$steps))
+yfit <- yfit*diff(myHist$mids[1:2])*length(sumByDate$steps)
 lines(xfit, yfit, col="blue", lwd=2)
 ```
 
 
-***Mean & Median ***
+3. Calculate and report the mean and median of the total number of steps taken per day
 
 
 ```{r mean_median}
-theMean<-mean(x)
-theMedian<-median(x)
+theMean<-mean(sumByDate$steps)
+theMedian<-median(sumByDate$steps)
 theMean
 theMedian
 ```
 The mean of the total steps by date is `r format(theMean,big.mark=",",scientific=FALSE)` and the median is `r format(theMedian,big.mark=",",scientific=FALSE) `.
-
+<hr>
 ## Imputing missing values
 
 **What is the average daily activity pattern?**
@@ -63,23 +74,29 @@ The mean of the total steps by date is `r format(theMean,big.mark=",",scientific
 
 ```{r steps_interval,fig.height=4,fig.width=10}
 steps_interval <- aggregate(steps ~ interval, data = omittedNA, FUN = mean)
-par(pch=22, col="blue")
-plot(steps_interval,type="l")
-```
 
+par(pch=22)
+plot(steps_interval,type="l")
+polygon(c(min(steps_interval$interval), steps_interval$interval, max(steps_interval$interval)), c(min(steps_interval$steps), steps_interval$steps, min(steps_interval$steps)),  col = "blue") 
+```
+<hr>
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
 ```{r max_steps}
-max_steps<-steps_interval[which.max(steps_interval$steps),]
+max_stepsByDay<-aggregate(steps ~ interval+date, data = omittedNA, FUN = mean)
+max_steps<-max_stepsByDay[which.max(max_stepsByDay$steps),]
 r_steps <- max_steps$steps
 r_interval <- max_steps$interval
+r_date <-max_steps$date
 ```
+
+
+The 5-minute interval containing the maxium number of steps   is interval `r format(r_interval,big.mark=",",scientific=FALSE) ` with `r format(r_steps,big.mark=",",scientific=FALSE)` steps on `r r_date`.
+<hr>
+
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
-
-
-The 5-minute interval containing the maxium number of steps   is interval `r format(r_interval,big.mark=",",scientific=FALSE) ` with `r format(r_steps,big.mark=",",scientific=FALSE)` steps.
 
 
 ```{r}
@@ -87,14 +104,15 @@ The 5-minute interval containing the maxium number of steps   is interval `r for
 raw<-csvRaw
 totalNonCompleteRows <-sum(!complete.cases(raw))
 totalRawcount<-nrow(csvRaw)
-
+#Replace all NA's with the mean of the column
 raw$steps[is.na(raw$steps)] = mean(raw$steps, na.rm=TRUE)
 raw$interval[is.na(raw$interval)] = mean(raw$interval, na.rm=TRUE)
 countOfFilledIn<-nrow(raw)
 
+summary(raw)
 omittedNARaw <-na.omit(raw)
 CountOfFilledInWithoutNAs<-nrow(omittedNARaw)
-#head(raw)
+
 
 ```
 The original count of rows was `r format(totalRawcount,big.mark=",",scientific=FALSE) `, there are `r format(totalNonCompleteRows,big.mark=",",scientific=FALSE)` incomplete rows in the orignal dataset.
@@ -104,7 +122,7 @@ We utilized the mean of the column as a replacement for any NAs of the column. T
 To validate our results we performed a na.omit on the data frame and come up with `r format(CountOfFilledInWithoutNAs,big.mark=",",scientific=FALSE) ` as its row count.
 
 
-
+<hr>
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 ```{r filled_NAs_Hist, fig.height=4,fig.width=10}
 
@@ -116,15 +134,15 @@ theNewMedian <-median(sumByDate_noNAs$steps)
 
 
 NaFilledHist<-hist(sumByDate_noNAs$steps,xlab="Total Steps",main="Total Steps by date #2",col="gray")
-xfit<-seq(min(x),max(x),length=40)
-yfit<-dnorm(xfit,mean=mean(x),sd=sd(x))
-yfit <- yfit*diff(NaFilledHist$mids[1:2])*length(x)
+xfit<-seq(min(sumByDate_noNAs$steps),max(sumByDate_noNAs$steps),length=40)
+yfit<-dnorm(xfit,mean=mean(sumByDate_noNAs$steps),sd=sd(sumByDate_noNAs$steps))
+yfit <- yfit*diff(NaFilledHist$mids[1:2])*length(sumByDate_noNAs$steps)
 lines(xfit, yfit, col="blue", lwd=2)
 ```
 
 The original mean was `r format(theMean,big.mark=",",scientific=FALSE)` and the new mean is `r format( theNewMean,big.mark=",",scientific=FALSE)`.
 The original median was `r format(theMedian,big.mark=",",scientific=FALSE)` and the new median is `r format( theNewMedian,big.mark=",",scientific=FALSE)`.
-
+<hr>
 ## Are there differences in activity patterns between weekdays and weekends?
 
 
@@ -135,7 +153,7 @@ raw[sample(nrow(raw),5),]
 raw$wknd_wkday<- as.factor(ifelse(raw$daysOfWeek %in% c("Saturday","Sunday"), "Weekend", "Weekday")) 
 raw[sample(nrow(raw),5),]
 ```
-
+<hr>
 
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
@@ -149,7 +167,8 @@ weekday_median<- aggregate(steps ~ wknd_wkday, steps_by_interval, median)
 names(weekday_median)<-c("wknd_wkday","median_steps")
 weekday_median
 
-qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="Interval",ylab="Number of steps",color=wknd_wkday) +facet_wrap(~ wknd_wkday, ncol = 1)
+qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="Interval",ylab="Number of steps",color=wknd_wkday) +facet_wrap(~ wknd_wkday, ncol = 1)+ geom_area()
 
 qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="Interval",ylab="Number of steps",color=wknd_wkday) #+facet_wrap(~ wknd_wkday, ncol = 1)
+
 ```
