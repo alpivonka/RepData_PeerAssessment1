@@ -1,5 +1,6 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: AWP
 output: 
 html_document:
   theme: cerulean
@@ -65,7 +66,7 @@ theMedian
 ```
 The mean of the total steps by date is `r format(theMean,big.mark=",",scientific=FALSE)` and the median is `r format(theMedian,big.mark=",",scientific=FALSE) `.
 <hr>
-## Imputing missing values
+
 
 **What is the average daily activity pattern?**
 
@@ -96,13 +97,21 @@ r_date <-max_steps$date
 The 5-minute interval containing the maxium number of steps   is interval `r format(r_interval,big.mark=",",scientific=FALSE) ` with `r format(r_steps,big.mark=",",scientific=FALSE)` steps on `r r_date`.
 <hr>
 
-3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
+## Imputing missing values
 
 ```{r}
-#csvRaw[is.na(csvRaw$steps)] <- mean(csvRaw$steps, na.rm = TRUE)
 raw<-csvRaw
 totalNonCompleteRows <-sum(!complete.cases(raw))
+```
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs): <b>`r format(totalNonCompleteRows,big.mark=",",scientific=FALSE) `</b>
+
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+
 totalRawcount<-nrow(csvRaw)
 #Replace all NA's with the mean of the column
 raw$steps[is.na(raw$steps)] = mean(raw$steps, na.rm=TRUE)
@@ -172,3 +181,4 @@ qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="In
 qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="Interval",ylab="Number of steps",color=wknd_wkday) #+facet_wrap(~ wknd_wkday, ncol = 1)
 
 ```
+<hr><br>
