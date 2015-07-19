@@ -10,7 +10,17 @@ html_document:
 ---
 ## Loading and preprocessing the data
 
-```{r load_data}
+```{r decompress_data}
+#Does the /data directory exist, if not create it
+#Has the activity data been extracted, if not extract it into the /data directory
+if(!file.exists("data")){
+  dir.create("data")
+}else if(!file.exists("data/activity.csv")){
+    unzip("activity.zip", exdir = "data")
+}
+```
+
+```{r read_data}
 csvRaw <-read.csv("data/activity.csv")
 totalRows<-nrow(csvRaw)
 uniqueDates<-length(unique(csvRaw$date))
