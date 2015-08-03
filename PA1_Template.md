@@ -230,11 +230,11 @@ raw[sample(nrow(raw),5),]
 
 ```
 ##       steps       date interval daysOfWeek
-## 10468     0 2012-11-06      815    Tuesday
-## 6302      0 2012-10-22     2105     Monday
-## 13632     0 2012-11-17      755   Saturday
-## 14804   111 2012-11-21      935  Wednesday
-## 6477     20 2012-10-23     1140    Tuesday
+## 5527      0 2012-10-20      430   Saturday
+## 2775      0 2012-10-10     1510  Wednesday
+## 4500      0 2012-10-16     1455    Tuesday
+## 1695      0 2012-10-06     2110   Saturday
+## 14056    84 2012-11-18     1915     Sunday
 ```
 
 ```r
@@ -244,11 +244,11 @@ raw[sample(nrow(raw),5),]
 
 ```
 ##         steps       date interval daysOfWeek wknd_wkday
-## 4154   0.0000 2012-10-15     1005     Monday    Weekday
-## 3141   0.0000 2012-10-11     2140   Thursday    Weekday
-## 1068   0.0000 2012-10-04     1655   Thursday    Weekday
-## 9134  37.3826 2012-11-01     1705   Thursday    Weekday
-## 16361  0.0000 2012-11-26     1920     Monday    Weekday
+## 10569  0.0000 2012-11-06     1640    Tuesday    Weekday
+## 4599   0.0000 2012-10-16     2310    Tuesday    Weekday
+## 11619 37.3826 2012-11-10      810   Saturday    Weekend
+## 5214   0.0000 2012-10-19      225     Friday    Weekday
+## 14010  0.0000 2012-11-18     1525     Sunday    Weekend
 ```
 <hr>
 
@@ -293,3 +293,4 @@ qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="In
 
 ![plot of chunk panel_plot](figure/panel_plot-2.png) 
 <hr><br>
+End

@@ -192,3 +192,4 @@ qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="In
 
 ```
 <hr><br>
+End
