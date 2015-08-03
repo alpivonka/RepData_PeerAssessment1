@@ -229,12 +229,12 @@ raw[sample(nrow(raw),5),]
 ```
 
 ```
-##         steps       date interval daysOfWeek
-## 11682 37.3826 2012-11-10     1325   Saturday
-## 9841  37.3826 2012-11-04      400     Sunday
-## 16155  0.0000 2012-11-26      210     Monday
-## 8452  75.0000 2012-10-30      815    Tuesday
-## 2687  75.0000 2012-10-10      750  Wednesday
+##       steps       date interval daysOfWeek
+## 10468     0 2012-11-06      815    Tuesday
+## 6302      0 2012-10-22     2105     Monday
+## 13632     0 2012-11-17      755   Saturday
+## 14804   111 2012-11-21      935  Wednesday
+## 6477     20 2012-10-23     1140    Tuesday
 ```
 
 ```r
@@ -243,12 +243,12 @@ raw[sample(nrow(raw),5),]
 ```
 
 ```
-##       steps       date interval daysOfWeek wknd_wkday
-## 13441    64 2012-11-16     1600     Friday    Weekday
-## 16295     0 2012-11-26     1350     Monday    Weekday
-## 7974      0 2012-10-28     1625     Sunday    Weekend
-## 724       0 2012-10-03     1215  Wednesday    Weekday
-## 5965    110 2012-10-21     1700     Sunday    Weekend
+##         steps       date interval daysOfWeek wknd_wkday
+## 4154   0.0000 2012-10-15     1005     Monday    Weekday
+## 3141   0.0000 2012-10-11     2140   Thursday    Weekday
+## 1068   0.0000 2012-10-04     1655   Thursday    Weekday
+## 9134  37.3826 2012-11-01     1705   Thursday    Weekday
+## 16361  0.0000 2012-11-26     1920     Monday    Weekday
 ```
 <hr>
 
@@ -293,12 +293,3 @@ qplot(interval,steps,data = steps_by_interval,type = 'l',geom=c("line"),xlab="In
 
 ![plot of chunk panel_plot](figure/panel_plot-2.png) 
 <hr><br>
-
-
-```r
-knit2html("PA_template.Rmd")
-```
-
-```
-## Error in eval(expr, envir, enclos): could not find function "knit2html"
-```
